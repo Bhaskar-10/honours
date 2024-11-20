@@ -73,7 +73,7 @@ EduTrack CI is a Spring Boot-based Student Management System providing a RESTful
 ## Technologies Used
 
 - **Backend**: Spring Boot
-- **Database**: Hibernate/JPA (integration-ready)
+- **Database**: MySQL
 - **CI/CD**: Jenkins
 - **Cloud Deployment**: AWS (EC2)
 
@@ -83,7 +83,7 @@ EduTrack CI is a Spring Boot-based Student Management System providing a RESTful
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/Bhaskar-10/honours.git
    cd EduTrack-CI
 
    ```
