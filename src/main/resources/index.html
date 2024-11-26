@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none mr-4">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="#" class="text-2xl font-bold text-blue-600">
+                    <i class="fas fa-graduation-cap mr-2"></i>Student MS
+                </a>
+            </div>
+            <div class="flex items-center">
+                <div id="user-dropdown" class="relative hidden">
+                    <button class="flex items-center text-gray-700 hover:text-gray-900 focus:outline-none" id="userDropdown">
+                        <i class="fas fa-user-circle text-2xl mr-2"></i>
+                        <span class="user-name-text font-medium">Admin</span>
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden" id="dropdownMenu">
+                        <a href="#" id="logout-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen fixed left-0 top-0 z-40 pt-16 sidebar">
+        <div class="p-4 border-b border-gray-700">
+            <div class="flex items-center justify-center mb-4">
+                <img src="https://via.placeholder.com/80" alt="User Avatar" class="w-20 h-20 rounded-full border-2 border-blue-500">
+            </div>
+            <h2 class="text-xl font-semibold text-center">Administrator</h2>
+            <p class="text-sm text-gray-400 text-center">System Admin</p>
+        </div>
+        <nav class="mt-4">
+            <a href="#" id="manage-students-link" class="block py-2 px-4 text-sm hover:bg-gray-700 transition duration-200">
+                <i class="fas fa-users mr-2"></i>Manage Students
+            </a>
+            <a href="#" id="reports-link" class="block py-2 px-4 text-sm hover:bg-gray-700 transition duration-200">
+                <i class="fas fa-chart-bar mr-2"></i>Reports
+            </a>
+            <a href="#" id="settings-link" class="block py-2 px-4 text-sm hover:bg-gray-700 transition duration-200">
+                <i class="fas fa-cog mr-2"></i>Settings
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="ml-64 pt-16 p-6 main-content">
+        <!-- Content will be loaded here -->
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function checkAuth() {
+                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+                const userData = sessionStorage.getItem('userData');
+                
+                if (!isLoggedIn || !userData) {
+                    loadContent('login.html');
+                    hideDashboardElements();
+                    return false;
+                }
+                return true;
+            }
+
+            if (checkAuth()) {
+                showDashboardElements();
+                loadContent('studentManagement.html');
+            }
+
+            $('#sidebar-toggle').click(function() {
+                $('#sidebar').toggleClass('sidebar-hidden');
+                $('#main-content').toggleClass('expanded');
+            });
+
+            $('#userDropdown').click(function() {
+                $('#dropdownMenu').toggleClass('hidden');
+            });
+
+            $(document).ajaxStart(function() {
+                $('#loading-spinner').removeClass('hidden');
+            }).ajaxStop(function() {
+                $('#loading-spinner').addClass('hidden');
+            });
+
+            function loadContent(url) {
+                $('#main-content').fadeOut(200, function() {
+                    $(this).load(url, function() {
+                        $(this).fadeIn(200);
+                    });
+                });
+            }
+
+            $(document).on('click', '#register-link', function(event) {
+                event.preventDefault();
+                loadContent('register.html');
+            });
+
+            $(document).on('click', '#login-link', function(event) {
+                event.preventDefault();
+                loadContent('login.html');
+            });
+
+            $(document).on('click', '#manage-students-link', function(event) {
+                event.preventDefault();
+                if (checkAuth()) {
+                    loadContent('studentManagement.html');
+                }
+            });
+
+            $(document).on('click', '#logout-link', function(event) {
+                event.preventDefault();
+                sessionStorage.clear();
+                hideDashboardElements();
+                loadContent('login.html');
+            });
+
+            function showDashboardElements() {
+                $('#sidebar').removeClass('sidebar-hidden');
+                $('#sidebar-toggle').removeClass('hidden');
+                $('#user-dropdown').removeClass('hidden');
+                $('#main-content').removeClass('expanded');
+                
+                const userData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+                if (userData.firstName) {
+                    $('.user-name-text').text(userData.firstName + ' ' + (userData.lastName || ''));
+                }
+            }
+
+            function hideDashboardElements() {
+                $('#sidebar').addClass('sidebar-hidden');
+                $('#sidebar-toggle').addClass('hidden');
+                $('#user-dropdown').addClass('hidden');
+                $('#main-content').addClass('expanded');
+            }
+
+            function handleResponsiveLayout() {
+                if ($(window).width() < 768) {
+                    $('#sidebar').addClass('sidebar-hidden');
+                    $('#main-content').addClass('expanded');
+                } else {
+                    if (checkAuth()) {
+                        $('#sidebar').removeClass('sidebar-hidden');
+                        $('#main-content').removeClass('expanded');
+                    }
+                }
+            }
+
+            handleResponsiveLayout();
+            $(window).resize(handleResponsiveLayout);
+        });
+    </script>
+</body>
+</html>
